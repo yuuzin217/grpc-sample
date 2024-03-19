@@ -23,6 +23,8 @@ const (
 	file_local      = "local_text.txt"
 	file_remote     = "remote_text.txt"
 	downloaded_text = "downloaded_text.txt"
+
+	kb = grpcsample.KB
 )
 
 func main() {
@@ -77,6 +79,7 @@ func callDownload(client pb.FileServiceClient) error {
 			if _, err := file.Write(buf.Bytes()); err != nil {
 				return err
 			}
+			log.Println("download finished.")
 			return nil
 		}
 		if err != nil {
@@ -96,7 +99,7 @@ func callUpload(client pb.FileServiceClient) error {
 	if err != nil {
 		return err
 	}
-	buf := make([]byte, 5)
+	buf := make([]byte, 1*kb)
 	for {
 		n, err := file.Read(buf)
 		if n == 0 || err == io.EOF {

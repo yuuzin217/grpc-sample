@@ -27,6 +27,8 @@ const (
 	dir_storage_local  = grpcsample.Dir_storage_local
 
 	uploaded_text = "uploaded_text.txt"
+
+	kb = grpcsample.KB
 )
 
 func (*server) ListFiles(ctx context.Context, req *pb.ListFilesRequest) (*pb.ListFilesResponse, error) {
@@ -53,7 +55,7 @@ func (*server) Download(request *pb.DownloadRequest, stream pb.FileService_Downl
 		return err
 	}
 	defer file.Close()
-	buf := make([]byte, 5)
+	buf := make([]byte, 1*kb)
 	for {
 		n, err := file.Read(buf)
 		// データが何も読み込まれなかった or ファイルの終端まで到達した

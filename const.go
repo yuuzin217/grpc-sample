@@ -6,4 +6,7 @@ const (
 	Dir_storage        = "../storage/"
 	Dir_storage_local  = "../storage/local/"
 	Dir_storage_remote = "../storage/remote/"
+
+	// キロバイト の単位
+	KB = 1024
 )
