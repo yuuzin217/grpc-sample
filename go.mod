@@ -1,4 +1,4 @@
-module grpc-sample
+module yuuzin217/grpc-sample
 
 go 1.21.6
 
