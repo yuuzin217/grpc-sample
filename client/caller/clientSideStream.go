@@ -1,7 +1,6 @@
 package caller
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"log"
@@ -17,7 +16,8 @@ func CallUpload(client pb.FileServiceClient) error {
 		return err
 	}
 	defer file.Close()
-	stream, err := client.Upload(context.Background())
+	ctx := newContext()
+	stream, err := client.Upload(ctx)
 	if err != nil {
 		return err
 	}

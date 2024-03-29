@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	// nolint:staticcheck
 	grpc_sample "yuuzin217/grpc-sample"
 	"yuuzin217/grpc-sample/client/caller"
 	"yuuzin217/grpc-sample/pb"
@@ -32,20 +31,21 @@ func main() {
 	}
 	fmt.Println(fileNames)
 
-	// // Download
-	// if err := CallDownload(client); err != nil {
-	// 	log.Fatalf("Failed to request Download: %v", err)
-	// }
+	// Download
+	if err := CallDownload(client); err != nil {
+		log.Fatalf("Failed to request Download: %v", err)
+	}
 
-	// // Upload
-	// if err := CallUpload(client); err != nil {
-	// 	log.Fatalf("Failed to request Upload: %v", err)
-	// }
+	// Upload
+	if err := CallUpload(client); err != nil {
+		log.Fatalf("Failed to request Upload: %v", err)
+	}
 
 	// bidirectional
 	if err := CallUploadAndNotifyProgress(client); err != nil {
 		log.Fatalf("Failed to request two-way: %v", err)
 	}
+
 }
 
 func newGRPCConnection() (*grpc.ClientConn, pb.FileServiceClient, error) {
