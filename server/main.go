@@ -9,7 +9,7 @@ import (
 	"net"
 	"os"
 	"time"
-	grpcsample "yuuzin217/grpc-sample"
+	grpc_sample "yuuzin217/grpc-sample"
 	"yuuzin217/grpc-sample/pb"
 
 	"google.golang.org/grpc"
@@ -26,15 +26,15 @@ type server struct {
 }
 
 const (
-	host = grpcsample.Host
+	host = grpc_sample.Host
 
-	dir_storage        = grpcsample.Dir_storage
-	dir_storage_remote = grpcsample.Dir_storage_remote
-	dir_storage_local  = grpcsample.Dir_storage_local
+	dir_storage        = grpc_sample.Dir_storage
+	dir_storage_remote = grpc_sample.Dir_storage_remote
+	dir_storage_local  = grpc_sample.Dir_storage_local
 
 	uploaded_text = "uploaded_text.txt"
 
-	kb = grpcsample.KB
+	kb = grpc_sample.KB
 )
 
 func (*server) ListFiles(ctx context.Context, req *pb.ListFilesRequest) (*pb.ListFilesResponse, error) {
@@ -164,22 +164,26 @@ func main() {
 	}
 
 	creds, err := credentials.NewServerTLSFromFile(
-		"../ssl/localhost.pem",
-		"../ssl/localhost-key.pem",
+		grpc_sample.CertFile_filePath,
+		grpc_sample.CertKey_filePath,
 	)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	s := grpc.NewServer(
-		grpc.Creds(creds),
-		grpc.UnaryInterceptor(
-			grpc_middleware.ChainUnaryServer(
-				myLogging(),
-				grpc_auth.UnaryServerInterceptor(authorize),
-			),
-		),
+	var interceptor []grpc.UnaryServerInterceptor
+	interceptor = append(interceptor,
+		myLogging(),
+		grpc_auth.UnaryServerInterceptor(authorize),
 	)
+
+	var opts_grpc []grpc.ServerOption
+	opts_grpc = append(opts_grpc,
+		grpc.Creds(creds),
+		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(interceptor...)),
+	)
+
+	s := grpc.NewServer(opts_grpc...)
 	pb.RegisterFileServiceServer(s, &server{})
 	fmt.Println("server is running...")
 	if err := s.Serve(listen); err != nil {
