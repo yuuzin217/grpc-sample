@@ -2,13 +2,11 @@ package caller
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"fmt"
 	"io"
 	"log"
 	"os"
-	"time"
 	"yuuzin217/grpc-sample/pb"
 
 	"google.golang.org/grpc/codes"
@@ -16,7 +14,7 @@ import (
 )
 
 func CallDownload(client pb.FileServiceClient) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Second)
+	ctx, cancel := newContextWithTimeout(100)
 	defer cancel()
 	stream, err := client.Download(ctx, &pb.DownloadRequest{FileName: file_remote})
 	if err != nil {
@@ -32,16 +30,14 @@ func CallDownload(client pb.FileServiceClient) error {
 			log.Println("download finished.")
 			return nil
 		}
-		if grpcErr, ok := status.FromError(err); ok {
-			if err := gRPCErrorCheck(grpcErr); err != nil {
-				return err
-			}
+		if err := gRPCErrorCheck(err); err != nil {
+			return err
 		}
 		if err != nil {
 			return err
 		}
-		log.Println("loading...")
 		buf.Write(response.Data)
+		log.Println("loading...")
 	}
 }
 
@@ -58,14 +54,18 @@ func createDownloadedFile(buf bytes.Buffer) error {
 	return nil
 }
 
-func gRPCErrorCheck(grpcErr *status.Status) error {
-	switch grpcErr.Code() {
-	case codes.NotFound:
-		return fmt.Errorf("error code: %v, error message: %v", grpcErr.Code(), grpcErr.Message())
-	case codes.DeadlineExceeded:
-		return errors.New("deadline exceeded")
-	default:
-		// 未ハンドリングの gRPC のエラー
-		return nil
+func gRPCErrorCheck(err error) error {
+	if grpcErr, ok := status.FromError(err); ok {
+		switch grpcErr.Code() {
+		case codes.NotFound:
+			return fmt.Errorf("error code: %v, error message: %v", grpcErr.Code(), grpcErr.Message())
+		case codes.DeadlineExceeded:
+			return errors.New("deadline exceeded")
+		default:
+			// 未ハンドリングの gRPC のエラー
+			return err
+		}
 	}
+	return nil
+
 }

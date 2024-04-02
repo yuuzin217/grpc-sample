@@ -26,7 +26,7 @@ type server struct {
 }
 
 const (
-	address = grpcsample.Address
+	host = grpcsample.Host
 
 	dir_storage        = grpcsample.Dir_storage
 	dir_storage_remote = grpcsample.Dir_storage_remote
@@ -158,7 +158,7 @@ func authorize(ctx context.Context) (context.Context, error) {
 }
 
 func main() {
-	listen, err := net.Listen("tcp", address)
+	listen, err := net.Listen("tcp", host)
 	if err != nil {
 		log.Fatalf("Failed to listen: %v", err)
 	}

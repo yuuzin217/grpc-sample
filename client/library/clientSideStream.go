@@ -1,6 +1,7 @@
 package caller
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"log"
@@ -16,7 +17,7 @@ func CallUpload(client pb.FileServiceClient) error {
 		return err
 	}
 	defer file.Close()
-	ctx := newContext()
+	ctx := context.Background()
 	stream, err := client.Upload(ctx)
 	if err != nil {
 		return err
@@ -25,19 +26,30 @@ func CallUpload(client pb.FileServiceClient) error {
 	for {
 		n, err := file.Read(buf)
 		if n == 0 || err == io.EOF {
-			response, err := stream.CloseAndRecv()
-			if err != nil {
-				return err
-			}
-			log.Printf("received data size: %v", response.Size)
-			return nil
+			return closeAndRecv(stream)
 		}
 		if err != nil {
 			return err
 		}
-		if err := stream.Send(&pb.UploadRequest{Data: buf[:n]}); err != nil {
+		if err := stream.Send(newUploadRequest(buf, n)); err != nil {
 			return err
 		}
+		log.Println("uploading...")
 		time.Sleep(1 * time.Second)
 	}
+}
+
+func newUploadRequest(buf []byte, cap int) *pb.UploadRequest {
+	return &pb.UploadRequest{
+		Data: buf[:cap],
+	}
+}
+
+func closeAndRecv(stream pb.FileService_UploadClient) error {
+	res, err := stream.CloseAndRecv()
+	if err != nil {
+		return err
+	}
+	log.Printf("received data size: %v\n", res.Size)
+	return nil
 }
