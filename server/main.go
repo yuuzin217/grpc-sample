@@ -25,18 +25,6 @@ type server struct {
 	pb.UnimplementedFileServiceServer
 }
 
-const (
-	host = grpc_sample.Host
-
-	dir_storage        = grpc_sample.Dir_storage
-	dir_storage_remote = grpc_sample.Dir_storage_remote
-	dir_storage_local  = grpc_sample.Dir_storage_local
-
-	uploaded_text = "uploaded_text.txt"
-
-	kb = grpc_sample.KB
-)
-
 func (*server) ListFiles(ctx context.Context, req *pb.ListFilesRequest) (*pb.ListFilesResponse, error) {
 	fmt.Println("ListFiles was invoked.")
 	paths, err := os.ReadDir(dir_storage)
