@@ -14,19 +14,29 @@ func (*server) Upload(stream pb.FileService_UploadServer) error {
 	for {
 		request, err := stream.Recv()
 		if err == io.EOF {
-			file, err := os.Create(fmt.Sprint(dir_storage_remote, uploaded_text))
-			if err != nil {
+			if err := uploadFileCreate(buf); err != nil {
 				return err
 			}
-			defer file.Close()
-			if _, err := file.Write(buf.Bytes()); err != nil {
+			if err := stream.SendAndClose(&pb.UploadResponse{Size: int32(buf.Len())}); err != nil {
 				return err
 			}
-			return stream.SendAndClose(&pb.UploadResponse{Size: int32(buf.Len())})
+			return nil
 		}
 		if err != nil {
 			return err
 		}
 		buf.Write(request.Data)
 	}
+}
+
+func uploadFileCreate(buf bytes.Buffer) error {
+	file, err := os.Create(fmt.Sprint(dir_storage_remote, uploaded_text))
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+	if _, err := file.Write(buf.Bytes()); err != nil {
+		return err
+	}
+	return nil
 }
