@@ -3,12 +3,10 @@ package main
 import (
 	"context"
 	"log"
-	grpc_sample "yuuzin217/grpc-sample"
 
 	grpc_auth "github.com/grpc-ecosystem/go-grpc-middleware/auth"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/status"
 )
 
@@ -37,13 +35,6 @@ func authorize(ctx context.Context) (context.Context, error) {
 		return nil, status.Error(codes.Unauthenticated, "token is invalid.")
 	}
 	return ctx, nil
-}
-
-func loadCreds() (credentials.TransportCredentials, error) {
-	return credentials.NewServerTLSFromFile(
-		grpc_sample.CertFile_filePath,
-		grpc_sample.CertKey_filePath,
-	)
 }
 
 func loadUnaryInterceptor() []grpc.UnaryServerInterceptor {
