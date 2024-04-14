@@ -8,7 +8,6 @@ import (
 
 func (*server) UploadAndNotifyProgress(stream pb.FileService_UploadAndNotifyProgressServer) error {
 	fmt.Println("UploadAndNotifyProgress was invoked.")
-	var size int
 	for {
 		request, err := stream.Recv()
 		if err == io.EOF {
@@ -18,15 +17,19 @@ func (*server) UploadAndNotifyProgress(stream pb.FileService_UploadAndNotifyProg
 		if err != nil {
 			return err
 		}
-		data := request.Data
-		fmt.Printf("received data: %v\n", data)
-		size += len(data)
-		if err := stream.Send(
-			&pb.UploadAndNotifyProgressResponse{
-				Msg: fmt.Sprintf("received %v bytes", size),
-			},
-		); err != nil {
+		if err := sendSize(stream, request.Data); err != nil {
 			return err
 		}
 	}
+}
+
+func sendSize(stream pb.FileService_UploadAndNotifyProgressServer, data []byte) error {
+	fmt.Printf("received data: %v\n", data)
+	size := 0
+	size += len(data)
+	return stream.Send(
+		&pb.UploadAndNotifyProgressResponse{
+			Msg: fmt.Sprintf("received %v bytes", size),
+		},
+	)
 }
