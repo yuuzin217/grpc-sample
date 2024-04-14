@@ -25,8 +25,8 @@ func (*server) Download(request *pb.DownloadRequest, stream pb.FileService_Downl
 	buf := make([]byte, 1*kb)
 	for {
 		n, err := file.Read(buf)
-		// データが何も読み込まれなかった or ファイルの終端まで到達した
 		if n == 0 || err == io.EOF {
+			// データが何も読み込まれなかった or ファイルの終端まで到達した
 			return nil
 		}
 		if err != nil {
